@@ -4,7 +4,7 @@ all: build_ext
 
 ifdef PYTHON3
 PYTHON=python3
-NOSETESTS=nosetests-3.4
+NOSETESTS=nosetests3
 else
 PYTHON=python
 NOSETESTS=nosetests
