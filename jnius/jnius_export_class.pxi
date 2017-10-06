@@ -74,7 +74,7 @@ class MetaJavaBase(type):
 
             if NULL != proxy and 0 != j_env[0].IsInstanceOf(j_env, obj, proxy):
                 # value is a proxy object. check whether it's one of ours
-                meth = j_env[0].GetStaticMethodID(j_env, proxy, <char *>'getInvocationHandler'
+                meth = j_env[0].GetStaticMethodID(j_env, proxy, <char *>'getInvocationHandler',
                     <char *>'(Ljava/lang/Object;)Ljava/lang/reflect/InvocationHandler;'
                 )
                 obj = j_env[0].CallStaticObjectMethod(j_env, proxy, meth, obj)
