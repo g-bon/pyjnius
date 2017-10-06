@@ -338,11 +338,11 @@ cdef jobject convert_python_to_jobject(JNIEnv *j_env, definition, obj) except *:
     elif definition[0] == 'L':
         if obj is None:
             return NULL
-        elif isinstance(obj, basestring) and jstringy_arg(definition):
-            return j_env[0].NewStringUTF(j_env, <char *><bytes>obj)
         elif isinstance(obj, str) and PY_MAJOR_VERSION >= 3 and jstringy_arg(definition):
             utf8 = obj.encode('utf-8')
             return j_env[0].NewStringUTF(j_env, <char *><bytes>utf8)
+        elif isinstance(obj, basestring) and jstringy_arg(definition):
+            return j_env[0].NewStringUTF(j_env, <char *><bytes>obj)
         elif isinstance(obj, (int, long)) and \
                 definition in (
                     'Ljava/lang/Integer;',
