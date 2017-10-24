@@ -3,6 +3,10 @@ try:
     from setuptools import setup, Extension
 except ImportError:
     from distutils.core import setup, Extension
+try:
+    import subprocess32 as subprocess
+except ImportError:
+    import subprocess
 from os import environ
 from os.path import dirname, join, exists
 import sys
@@ -69,7 +73,6 @@ if platform == 'android':
     libraries = ['sdl', 'log']
     library_dirs = ['libs/' + getenv('ARCH')]
 elif platform == 'darwin':
-    import subprocess
     framework = subprocess.Popen(
         '/usr/libexec/java_home',
         stdout=subprocess.PIPE, shell=True).communicate()[0]
@@ -89,7 +92,6 @@ elif platform == 'darwin':
             '{0}/include/darwin'.format(framework)
         ]
 else:
-    import subprocess
     # otherwise, we need to search the JDK_HOME
     jdk_home = getenv('JDK_HOME')
     if not jdk_home:
@@ -167,6 +169,12 @@ with open(join('jnius', '__init__.py')) as fd:
     versionline = [x for x in fd.readlines() if x.startswith('__version__')]
     version = versionline[0].split("'")[-2]
 
+# Compile NativeInvocationHandler.java
+subprocess.check_call([
+    'javac', '-target', '1.6', '-source', '1.6',
+    join('jnius', 'src', 'org', 'jnius', 'NativeInvocationHandler.java')
+])
+
 # create the extension
 setup(
     name='pyjnius',
@@ -190,6 +198,9 @@ setup(
             extra_link_args=extra_link_args
         )
     ],
+    package_data={
+        'jnius': [ 'src/org/jnius/*' ]
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
