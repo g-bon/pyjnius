@@ -1,4 +1,7 @@
 # Change Log
+i
+## [1.1.2-dev1](https://gituhb.com/drmoose/pyjnius/tree/1.1.2-dev1) (2017-10-24)
+Changed some stuff.
 
 ## [1.1.1](https://github.com/kivy/pyjnius/tree/1.1.1) (2017-03-24)
 [Full Changelog](https://github.com/kivy/pyjnius/compare/1.1.0...1.1.1)
