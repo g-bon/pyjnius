@@ -68,8 +68,9 @@ except ImportError:
     # and we go ahead with the 'desktop' file? Odd.
     files = [fn[:-3] + 'c' for fn in files if fn.endswith('pyx')]
 
-def find_javac(possible_homes):
-    name = "javac.exe" if sys.platform == "win32" else "javac"
+def find_binary(name, possible_homes):
+    if sys.platform == "win32":
+        name += ".exe"
     for home in possible_homes:
         for javac in [join(home, name), join(home, 'bin', name)]:
             if exists(javac):
@@ -78,11 +79,19 @@ def find_javac(possible_homes):
 
 
 def compile_native_invocation_handler(*possible_homes):
-    javac = find_javac(possible_homes)
+    javac = find_binary("javac", possible_homes)
     subprocess.check_call([
         javac, '-target', '1.6', '-source', '1.6',
-        join('jnius', 'src', 'org', 'jnius', 'NativeInvocationHandler.java')
+        join('jnius', 'src', 'org', 'jnius', 'NativeInvocationHandler.java'),
+        join('jnius', 'src', 'org', 'jnius', 'PropReader.java')
     ])
+
+
+def read_java_property(name, *possible_homes):
+    java = find_binary("java", possible_homes)
+    return subprocess.check_output([
+        java, '-cp', join('jinus', 'src'), 'org.jnius.PropReader', name
+    ]).strip()
 
 
 if platform == 'android':
@@ -140,20 +149,14 @@ else:
     if not jre_home:
         raise Exception('Unable to determine JRE_HOME')
 
-    # This dictionary converts values from platform.machine() to a "cpu" string.
-    # It is needed to set the correct lib path, found in the jre_home, eg.
-    # <jre_home>/lib/<cpu>/.
-    machine2cpu = {
-        "i686" : "i386",
-        "x86_64" : "amd64",
-        "armv7l" : "arm"
-    }
-    if machine() in machine2cpu.keys():
-        cpu = machine2cpu[machine()]
-    else:
-        print("WARNING: Not able to assign machine() = %s to a cpu value!" %(machine()))
+    compile_native_invocation_handler(jdk_home, jre_home)
+    cpu = read_java_property('os.arch')
+
+    if not cpu:
+        print("WARNING: Not able to detect os.arch from java.")
         print("         Using cpu = 'i386' instead!")
         cpu = 'i386'
+
 
     if platform == 'win32':
         incl_dir = join(jdk_home, 'include', 'win32')
@@ -173,7 +176,6 @@ else:
             join(jre_home, 'bin', 'server')
         ]
 
-    compile_native_invocation_handler(jdk_home, jre_home)
 
 # generate the config.pxi
 with open(join(dirname(__file__), 'jnius', 'config.pxi'), 'w') as fd:
