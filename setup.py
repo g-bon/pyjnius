@@ -75,8 +75,10 @@ def compile_native_invocation_handler(*possible_homes):
         for javac in [join(home, name), join(home, 'bin', name)]:
             if exists(javac):
                 break
+            print("There is no %r" % javac)
         else:
             javac = name  # Fall back to "hope it's on the path"
+    print("I will invoke %r" % javac)
     subprocess.check_call([
         javac, '-target', '1.6', '-source', '1.6',
         join('jnius', 'src', 'org', 'jnius', 'NativeInvocationHandler.java')
