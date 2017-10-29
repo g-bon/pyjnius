@@ -68,15 +68,17 @@ except ImportError:
     # and we go ahead with the 'desktop' file? Odd.
     files = [fn[:-3] + 'c' for fn in files if fn.endswith('pyx')]
 
-
-def compile_native_invocation_handler(*possible_homes):
+def find_javac(possible_homes):
     name = "javac.exe" if sys.platform == "win32" else "javac"
     for home in possible_homes:
         for javac in [join(home, name), join(home, 'bin', name)]:
             if exists(javac):
-                break
-        else:
-            javac = name  # Fall back to "hope it's on the path"
+                return javac
+    return name  # Fall back to "hope it's on the path"
+
+
+def compile_native_invocation_handler(*possible_homes):
+    javac = find_javac(possible_homes)
     subprocess.check_call([
         javac, '-target', '1.6', '-source', '1.6',
         join('jnius', 'src', 'org', 'jnius', 'NativeInvocationHandler.java')
